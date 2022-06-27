@@ -87,9 +87,8 @@ jobs:
     - name: Checkout Steam Works
       uses: actions/checkout@v2
       with:
-       ssh-key: ${{ secrets.STEAMWORKS_PULL_KEY }}
-       repository: 'hexa-core-eu/SteamWorksSDK'
-       ref: '1.49'
+       repository: 'AlexApps99/SteamworksSDK'
+#        ref: '1.49'
        path: 'steamworks-sdk'
     - name: Run Build
       shell: bash
