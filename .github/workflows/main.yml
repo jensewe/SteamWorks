@@ -113,7 +113,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        python ../configure.py --hl2sdk-root=$GITHUB_WORKSPACE --mms-path=$GITHUB_WORKSPACE/mmsource --sm-path=$GITHUB_WORKSPACE/sourcemod --steamworks-path=$GITHUB_WORKSPACE/steamworks-sdk --enable-optimize
+        python ../configure.py --hl2sdk-root=$GITHUB_WORKSPACE --mms-path=$GITHUB_WORKSPACE/mmsource --sm-path=$GITHUB_WORKSPACE/sourcemod --steamworks-path=$GITHUB_WORKSPACE/steamworks-sdk --sdks=present --enable-optimize
         ambuild
     - name: Zip Release
       working-directory: ./sm-environment
