@@ -24,13 +24,11 @@ jobs:
         os: [ ubuntu-18.04, windows-latest ]
         include:
         - os: ubuntu-18.04
-          asset_name: 'package-linux'
           zip_cmd: 'zip -r package.zip build/package' 
           CC: 'clang'
           CXX: 'clang'
 
         - os: windows-latest
-          asset_name: 'package-windows'
           zip_cmd: 'powershell Compress-Archive build/package package.zip'           
 
     steps:
@@ -68,12 +66,35 @@ jobs:
         ref: '1.6-dev'
         path: 'sourcemod'
         submodules: 'recursive'
-    - name: Checkout HL2 SDK
+
+    - name: Checking out hl2sdk-l4d2
       uses: actions/checkout@v2
       with:
-        repository: 'alliedmodders/hl2sdk'
-        ref: 'sdk2013'
-        path: 'hl2sdk-sdk2013'
+        repository: alliedmodders/hl2sdk
+        ref: l4d2
+        path: hl2sdk-l4d2
+
+    - name: Checking out hl2sdk-l4d
+      uses: actions/checkout@v2
+      with:
+        repository: alliedmodders/hl2sdk
+        ref: l4d
+        path: hl2sdk-l4d
+
+    - name: Checking out hl2sdk-css
+      uses: actions/checkout@v2
+      with:
+        repository: alliedmodders/hl2sdk
+        ref: css
+        path: hl2sdk-css
+
+    - name: Checking out hl2sdk-csgo
+      uses: actions/checkout@v2
+      with:
+        repository: alliedmodders/hl2sdk
+        ref: csgo
+        path: hl2sdk-csgo
+
     - name: Checkout MM Source
       uses: actions/checkout@v2
       with:
@@ -92,15 +113,22 @@ jobs:
       run: |
         mkdir build
         cd build
-        python ../configure.py --hl2sdk-root=$GITHUB_WORKSPACE --mms-path=$GITHUB_WORKSPACE/mmsource --sm-path=$GITHUB_WORKSPACE/sourcemod --steamworks-path=$GITHUB_WORKSPACE/steamworks-sdk --sdks=sdk2013 --enable-optimize
+        python ../configure.py --hl2sdk-root=$GITHUB_WORKSPACE --mms-path=$GITHUB_WORKSPACE/mmsource --sm-path=$GITHUB_WORKSPACE/sourcemod --steamworks-path=$GITHUB_WORKSPACE/steamworks-sdk --enable-optimize
         ambuild
     - name: Zip Release
       working-directory: ./sm-environment
       run: ${{ matrix.zip_cmd }}                  
+
+    - name: Uploading package
+      uses: actions/upload-artifact@v2
+      with:
+        name: cleaner-sm${{ matrix.sm_version }}-${{ matrix.os_short }}-${{ env.GITHUB_SHA_SHORT }}
+        path: ${{ github.workspace }}/sm-environment/package.zip
+
     - name: Release
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: ${{ github.workspace }}/sm-environment/package.zip
-        asset_name: ${{ matrix.asset_name }}.zip
-        tag: ${{ github.ref }}    
+        asset_name: steamworks-sm${{ matrix.sm_version }}-${{ matrix.os_short }}-${{ env.GITHUB_SHA_SHORT }}.zip
+        if: github.ref == 'refs/heads/master'
