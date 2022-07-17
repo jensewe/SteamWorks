@@ -50,6 +50,7 @@
 #include "swgchooks.h"
 #include "ssnatives.h"
 #include "gcnatives.h"
+#include "swgsdetours.h"
 #include "swhttp.h"
 
 /**
