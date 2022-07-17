@@ -70,6 +70,7 @@ class SteamWorksConfig(object):
     self.mms_root = None
     self.sm_root = None
     self.steamworks_root = None
+    self.builder = builder
 
     # Note: only one architecture supported per build right now.
     if builder.options.target:
