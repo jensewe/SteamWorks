@@ -37,7 +37,37 @@
  * @brief Sample extension code header.
  */
 
-#include "smsdk_ext.h"
+#include "sdk/smsdk_ext.h"
+#include "CDetour/detours.h"
+
+#ifndef DETOUR_DECL_STATIC5
+#define DETOUR_DECL_STATIC5(name, ret, p1type, p1name, p2type, p2name, p3type, p3name, p4type, p4name, p5type, p5name) \
+ret (*name##_Actual)(p1type, p2type, p3type, p4type, p5type) = NULL; \
+ret name(p1type p1name, p2type p2name, p3type p3name, p4type p4name, p5type p5name)
+#endif
+
+#ifndef DETOUR_DECL_STATIC6
+#define DETOUR_DECL_STATIC6(name, ret, p1type, p1name, p2type, p2name, p3type, p3name, p4type, p4name, p5type, p5name, p6type, p6name) \
+ret (*name##_Actual)(p1type, p2type, p3type, p4type, p5type, p6type) = NULL; \
+ret name(p1type p1name, p2type p2name, p3type p3name, p4type p4name, p5type p5name, p6type p6name)
+#endif
+
+#ifndef DETOUR_DECL_STATIC7
+#define DETOUR_DECL_STATIC7(name, ret, p1type, p1name, p2type, p2name, p3type, p3name, p4type, p4name, p5type, p5name, p6type, p6name, p7type, p7name) \
+ret (*name##_Actual)(p1type, p2type, p3type, p4type, p5type, p6type, p7type) = NULL; \
+ret name(p1type p1name, p2type p2name, p3type p3name, p4type p4name, p5type p5name, p6type p6name, p7type p7name)
+#endif
+
+#ifndef DETOUR_DECL_STATIC8
+#define DETOUR_DECL_STATIC8(name, ret, p1type, p1name, p2type, p2name, p3type, p3name, p4type, p4name, p5type, p5name, p6type, p6name, p7type, p7name, p8type, p8name) \
+ret (*name##_Actual)(p1type, p2type, p3type, p4type, p5type, p6type, p7type, p8type) = NULL; \
+ret name(p1type p1name, p2type p2name, p3type p3name, p4type p4name, p5type p5name, p6type p6name, p7type p7name, p8type p8name)
+#endif
+
+#ifndef DETOUR_CREATE_STATIC_FIXED
+#define DETOUR_CREATE_STATIC_FIXED(name, address) CDetourManager::CreateDetour(GET_STATIC_CALLBACK(name), GET_STATIC_TRAMPOLINE(name), address);
+#endif
+
 #include "isteamgameserver.h"
 #include "steam_gameserver.h"
 

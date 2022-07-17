@@ -19,7 +19,8 @@
 #pragma once
 #include "smsdk_ext.h"
 #include "steam_gameserver.h"
-#include "CDetour/detours.h"
+
+class CDetour;
 
 class SteamWorksGSDetours
 {
@@ -31,5 +32,3 @@ class SteamWorksGSDetours
 		CDetour *m_pSafeInitDetour;
 		CDetour *m_pShutdownDetour;
 };
-
-#include "extension.h"
