@@ -37,7 +37,7 @@
  * @brief Sample extension code header.
  */
 
-#include "smsdk_ext.h"
+#include "sdk/smsdk_ext.h"
 #include "isteamgameserver.h"
 #include "steam_gameserver.h"
 

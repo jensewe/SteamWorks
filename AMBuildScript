@@ -313,16 +313,22 @@ class SteamWorksConfig(object):
     cxx.defines += ['WIN32', '_WINDOWS']
 
   def ConfigureForExtension(self, context, compiler):
-    compiler.cxxincludes += [
-      os.path.join(context.currentSourcePath),
-      os.path.join(context.currentSourcePath, 'sdk'),
-      os.path.join(self.sm_root, 'public'),
-      os.path.join(self.sm_root, 'public', 'extensions'),
-      os.path.join(self.sm_root, 'sourcepawn', 'include'),
-      os.path.join(self.sm_root, 'public', 'amtl', 'amtl'),
-      os.path.join(self.sm_root, 'public', 'amtl'),
-    ]
-    return compiler
+        compiler.cxxincludes += [
+            os.path.join(context.currentSourcePath),
+            os.path.join(self.sm_root, 'public'),
+            os.path.join(self.sm_root, 'public', 'extensions'),
+            os.path.join(self.sm_root, 'public', 'amtl', 'amtl'),
+            os.path.join(self.sm_root, 'public', 'amtl'),
+        ]
+        for sp_dir in [
+            os.path.join(self.sm_root, 'sourcepawn', 'include'),  # SM 1.7+
+            os.path.join(self.sm_root, 'public', 'sourcepawn')  # SM <= 1.6
+        ]:
+            if os.path.isdir(sp_dir):
+                compiler.cxxincludes.append(sp_dir)
+                break
+
+        return compiler
 
   def ConfigureForHL2(self, binary, sdk):
     compiler = binary.compiler
