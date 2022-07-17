@@ -32,5 +32,3 @@ class SteamWorksGSDetours
 		CDetour *m_pSafeInitDetour;
 		CDetour *m_pShutdownDetour;
 };
-
-#include "extension.h"
