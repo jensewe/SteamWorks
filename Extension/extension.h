@@ -38,7 +38,6 @@
  */
 
 #include "sdk/smsdk_ext.h"
-#include "CDetour/detours.h"
 #include "isteamgameserver.h"
 #include "steam_gameserver.h"
 
