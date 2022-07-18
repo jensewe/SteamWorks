@@ -16,20 +16,39 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
+    name: build with sm${{ matrix.sm_version }} on ${{ matrix.os_short }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.8]
-        os: [ ubuntu-latest, windows-latest ]
-        include:
-        - os: ubuntu-latest
-          zip_cmd: 'zip -r package.zip build/package' 
-          CC: 'clang'
-          CXX: 'clang++'
+        os:
+          - ubuntu-latest
+          - windows-latest
 
-        - os: windows-latest
-          zip_cmd: 'powershell Compress-Archive build/package package.zip'           
+        sm_version:
+          - "1.6"
+          - "1.10"
+
+        mm_version:
+          - "1.10"
+
+        include:
+          - mm_version: "1.10"
+            mm_branch: "1.10-dev"
+
+          - sm_version: "1.10"
+            sm_branch: "1.10-dev"
+
+          - sm_version: "1.6"
+            sm_branch: "1.6-dev"
+
+          - os: ubuntu-latest
+            os_short: linux
+            zip_cmd: 'zip -r package.zip build/package'
+
+          - os: windows-latest
+            os_short: win
+            zip_cmd: 'powershell Compress-Archive build/package package.zip'
 
     steps:
     - uses: actions/checkout@v2
@@ -44,6 +63,8 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y clang gcc-multilib g++-multilib
+        echo "CC=clang" >> $GITHUB_ENV
+        echo "CXX=clang++" >> $GITHUB_ENV
 
     - name: Install Windows Deps
       if: runner.os == 'Windows'
