@@ -25,8 +25,8 @@ jobs:
         include:
         - os: ubuntu-18.04
           zip_cmd: 'zip -r package.zip build/package' 
-          CC: 'gcc'
-          CXX: 'g++'
+          CC: 'clang'
+          CXX: 'clang++'
 
         - os: windows-latest
           zip_cmd: 'powershell Compress-Archive build/package package.zip'           
@@ -43,7 +43,8 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt update
-        sudo apt install -y gcc-multilib g++-multilib
+        sudo apt install -y clang gcc-multilib g++-multilib
+
     - name: Install Windows Deps
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
