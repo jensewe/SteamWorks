@@ -25,8 +25,8 @@ jobs:
         include:
         - os: ubuntu-18.04
           zip_cmd: 'zip -r package.zip build/package' 
-          CC: 'clang'
-          CXX: 'clang'
+          CC: 'gcc'
+          CXX: 'g++'
 
         - os: windows-latest
           zip_cmd: 'powershell Compress-Archive build/package package.zip'           
