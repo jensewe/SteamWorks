@@ -308,12 +308,12 @@ class SteamWorksConfig(object):
     cxx.cflags += ['/Oy-']
 
   def configure_linux(self, cxx):
-    cxx.defines += ['_LINUX', 'POSIX']
-    cxx.linkflags += ['-Wl,--exclude-libs,ALL', '-lm']
-    if cxx.vendor == 'gcc':
-      cxx.linkflags += ['-static-libgcc']
-    elif cxx.vendor == 'clang':
-      cxx.linkflags += ['-lgcc_eh']
+      cxx.defines += ['_LINUX', 'POSIX']
+      cxx.linkflags += ['-lm']
+      if cxx.vendor == 'gcc':
+          cxx.linkflags += ['-static-libgcc', '-static-libstdc++']
+      elif cxx.vendor == 'clang':
+          cxx.linkflags += ['-lgcc_eh']
 
   def configure_mac(self, cxx):
     cxx.defines += ['OSX', '_OSX', 'POSIX']
@@ -348,70 +348,105 @@ class SteamWorksConfig(object):
         return compiler
 
   def ConfigureForHL2(self, binary, sdk):
-    compiler = binary.compiler
+        compiler = binary.compiler
 
-    if sdk.name == 'episode1':
-      mms_path = os.path.join(self.mms_root, 'core-legacy')
-    else:
-      mms_path = os.path.join(self.mms_root, 'core')
+        compiler.cxxincludes += [
+            os.path.join(self.mms_root, 'core'),
+            os.path.join(self.mms_root, 'core', 'sourcehook'),
+        ]
 
-    compiler.cxxincludes += [
-      os.path.join(mms_path),
-      os.path.join(mms_path, 'sourcehook'),
-    ]
+        defines = ['SE_' + PossibleSDKs[i].define + '=' +
+               PossibleSDKs[i].code for i in PossibleSDKs]
+        compiler.defines += defines
 
-    defines = ['SE_' + PossibleSDKs[i].define + '=' +
-           PossibleSDKs[i].code for i in PossibleSDKs]
-    compiler.defines += defines
+        paths = [
+            ['public'],
+            ['public', 'engine'],
+            ['public', 'mathlib'],
+            ['public', 'vstdlib'],
+            ['public', 'tier0'],
+            ['public', 'tier1'],
+            ['public', 'game', 'server'],
+            ['public', 'toolframework'],
+            ['game', 'shared'],
+            ['common']
+        ]
 
-    paths = [
-      ['public'],
-      ['public', 'engine'],
-      ['public', 'mathlib'],
-      ['public', 'vstdlib'],
-      ['public', 'tier0'],
-      ['public', 'tier1']
-    ]
-    if sdk.name == 'episode1' or sdk.name == 'darkm':
-      paths.append(['public', 'dlls'])
-      paths.append(['game_shared'])
-    else:
-      paths.append(['public', 'game', 'server'])
-      paths.append(['public', 'toolframework'])
-      paths.append(['game', 'shared'])
-      paths.append(['common'])
+        compiler.defines += ['SOURCE_ENGINE=' + sdk.code]
 
-    compiler.defines += ['SOURCE_ENGINE=' + sdk.code]
+        if compiler.like('msvc'):
+            if compiler.version >= 1900:
+                compiler.linkflags += ['legacy_stdio_definitions.lib']
+            # https://developercommunity.visualstudio.com/t/msvc-142328019-is-missing-include-typeinfoh/734566#T-N752563
+            # https://qiita.com/yumetodo/items/8c112fca0a8e6b47072d
+            # let include local typeinfo.h which includes typeinfo
+            if compiler.version >= 1923:
+                compiler.cxxincludes += [os.path.join(self.builder.currentSourcePath, 'core', 'typeinfo_dbg')]
+            compiler.defines += ['COMPILER_MSVC', 'COMPILER_MSVC32']
+        else:
+            compiler.defines += ['COMPILER_GCC']
 
-    if sdk.name in ['sdk2013', 'bms'] and compiler.like('gcc'):
-      # The 2013 SDK already has these in public/tier0/basetypes.h
-      compiler.defines.remove('stricmp=strcasecmp')
-      compiler.defines.remove('_stricmp=strcasecmp')
-      compiler.defines.remove('_snprintf=snprintf')
-      compiler.defines.remove('_vsnprintf=vsnprintf')
+        if sdk.name in ['css', 'hl2dm', 'dods', 'sdk2013', 'bms', 'tf2', 'l4d', 'nucleardawn', 'l4d2', 'dota']:
+            if compiler.target.platform in ['linux', 'mac']:
+                compiler.defines += ['NO_HOOK_MALLOC', 'NO_MALLOC_OVERRIDE']
 
-    if compiler.like('msvc'):
-      compiler.defines += ['COMPILER_MSVC', 'COMPILER_MSVC32']
-      compiler.linkflags += ['legacy_stdio_definitions.lib']
-    else:
-      compiler.defines += ['COMPILER_GCC']
+        if sdk.name == 'csgo' and compiler.target.platform == 'linux':
+            compiler.linkflags += ['-lstdc++']
 
-    # For everything after Swarm, this needs to be defined for entity networking
-    # to work properly with sendprop value changes.
-    if sdk.name in ['blade', 'insurgency', 'doi', 'csgo']:
-      compiler.defines += ['NETWORK_VARS_ENABLED']
+        for path in paths:
+            compiler.cxxincludes += [os.path.join(sdk.path, *path)]
 
-    if sdk.name in ['css', 'hl2dm', 'dods', 'sdk2013', 'bms', 'tf2', 'l4d', 'nucleardawn', 'l4d2']:
-      if builder.host.platform in ['linux', 'mac']:
-        compiler.defines += ['NO_HOOK_MALLOC', 'NO_MALLOC_OVERRIDE']
+        if compiler.target.platform == 'linux':
+            lib_folder = os.path.join(sdk.path, 'lib', 'linux')
+        elif compiler.target.platform == 'mac':
+            lib_folder = os.path.join(sdk.path, 'lib', 'mac')
+        else:
+            lib_folder = None
 
-    if sdk.name == 'csgo' and builder.host.platform == 'linux':
-      compiler.linkflags += ['-lstdc++']
+        if compiler.target.platform in ['linux', 'mac']:
+            compiler.postlink += [
+                compiler.Dep(os.path.join(lib_folder, 'tier1_i486.a')),
+                compiler.Dep(os.path.join(lib_folder, 'mathlib_i486.a')),
+            ]
+            if sdk.name in ['blade', 'insurgency', 'csgo', 'dota']:
+                compiler.postlink += [compiler.Dep(os.path.join(lib_folder, 'interfaces_i486.a'))]
 
-    for path in paths:
-      compiler.cxxincludes += [os.path.join(sdk.path, *path)]
+        dynamic_libs = []
+        if compiler.target.platform == 'linux':
+            if sdk.name in ['css', 'hl2dm', 'dods', 'tf2', 'sdk2013', 'bms', 'nucleardawn', 'l4d2', 'insurgency']:
+                dynamic_libs = ['libtier0_srv.so', 'libvstdlib_srv.so']
+            elif sdk.name in ['l4d', 'blade', 'insurgency', 'csgo', 'dota']:
+                dynamic_libs = ['libtier0.so', 'libvstdlib.so']
+            else:
+                dynamic_libs = ['tier0_i486.so', 'vstdlib_i486.so']
 
-    return binary
+        elif compiler.target.platform == 'mac':
+            compiler.linkflags.append('-liconv')
+            dynamic_libs = ['libtier0.dylib', 'libvstdlib.dylib']
+
+        elif compiler.target.platform == 'windows':
+            libs = ['tier0', 'tier1', 'vstdlib', 'mathlib']
+            if sdk.name in ['swarm', 'blade', 'insurgency', 'csgo', 'dota']:
+                libs.append('interfaces')
+
+            for lib in libs:
+                lib_path = os.path.join(sdk.path, 'lib', 'public', lib) + '.lib'
+                compiler.linkflags.append(compiler.Dep(lib_path))
+
+        for library in dynamic_libs:
+            source_path = os.path.join(lib_folder, library)
+            output_path = os.path.join(binary.localFolder, library)
+
+            def make_linker(source_path, output_path):
+                def link(context, binary):
+                    cmd_node, (output,) = context.AddSymlink(source_path, output_path)
+                    return output
+                return link
+
+            linker = make_linker(source_path, output_path)
+            compiler.linkflags.append(compiler.Dep(library, linker))
+
+        return binary
 
   def HL2Library(self, context, name, sdk):
     binary = context.compiler.Library(name)
