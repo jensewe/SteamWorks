@@ -36,7 +36,7 @@ if os.path.isdir(libudis_folder):
 for sdk_name in SteamWorks.sdks:
   sdk = SteamWorks.sdks[sdk_name]
 
-  binary = SteamWorks.HL2Config(project, builder.cxx, 'SteamWorks.ext', sdk)
+  binary = SteamWorks.HL2Config(project, builder.cxx, 'SteamWorks.ext.' + sdk.ext, sdk)
   
   binary.compiler.defines += ['META_NO_HL2SDK', 'SOURCEMOD_BUILD', 'VERSION_SAFE_STEAM_API_INTERFACES']
   binary.compiler.cxxincludes += [os.path.join(SteamWorks.steamworks_root, 'public', 'steam'), os.path.join(sdk.path, 'public', 'steam')];
