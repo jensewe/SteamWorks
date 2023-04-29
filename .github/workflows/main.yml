@@ -16,91 +16,132 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
+    name: build with sm${{ matrix.sm_version }} on ${{ matrix.os_short }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.8]
-        os: [ ubuntu-18.04, windows-latest ]
-        include:
-        - os: ubuntu-18.04
-          asset_name: 'package-linux'
-          zip_cmd: 'zip -r package.zip build/package' 
-          CC: 'clang'
-          CXX: 'clang'
+        os:
+          - ubuntu-latest
+          - windows-latest
 
-        - os: windows-latest
-          asset_name: 'package-windows'
-          zip_cmd: 'powershell Compress-Archive build/package package.zip'           
+        sm_version:
+          - "1.6"
+          # - "1.10"
+
+        mm_version:
+          - "1.10"
+
+        include:
+          - mm_version: "1.10"
+            mm_branch: "1.10-dev"
+
+          # - sm_version: "1.10"
+          #   sm_branch: "1.10-dev"
+
+          - sm_version: "1.6"
+            sm_branch: "1.6-dev"
+
+          - os: ubuntu-latest
+            os_short: linux
+
+          - os: windows-latest
+            os_short: win
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        path: 'sm-environment'    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install Linux Deps
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt update
-        sudo apt install -y gcc-multilib g++-multilib
-    - name: Install Windows Deps
-      if: runner.os == 'Windows'
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: x86
-    - name: Checkout AMBuild
-      uses: actions/checkout@v2
-      with:
-        repository: 'alliedmodders/ambuild'
-        path: 'ambuild'        
-    - name: Install AMBuild
-      run: |
-        cd ambuild
-        python setup.py build
-        python setup.py install
-    - name: Checkout SourceMod
-      uses: actions/checkout@v2
-      with:
-        repository: 'alliedmodders/sourcemod'
-        ref: '1.6-dev'
-        path: 'sourcemod'
-        submodules: 'recursive'
-    - name: Checkout HL2 SDK
-      uses: actions/checkout@v2
-      with:
-        repository: 'alliedmodders/hl2sdk'
-        ref: 'sdk2013'
-        path: 'hl2sdk-sdk2013'
-    - name: Checkout MM Source
-      uses: actions/checkout@v2
-      with:
-        repository: 'alliedmodders/metamod-source'
-        ref: '1.10-dev'
-        path: 'mmsource'        
-    - name: Checkout Steam Works
-      uses: actions/checkout@v2
-      with:
-       repository: 'AlexApps99/SteamworksSDK'
-#        ref: '1.49'
-       path: 'steamworks-sdk'
-    - name: Run Build
-      shell: bash
-      working-directory: ./sm-environment
-      run: |
-        mkdir build
-        cd build
-        python ../configure.py --hl2sdk-root=$GITHUB_WORKSPACE --mms-path=$GITHUB_WORKSPACE/mmsource --sm-path=$GITHUB_WORKSPACE/sourcemod --steamworks-path=$GITHUB_WORKSPACE/steamworks-sdk --sdks=sdk2013 --enable-optimize
-        ambuild
-    - name: Zip Release
-      working-directory: ./sm-environment
-      run: ${{ matrix.zip_cmd }}                  
-    - name: Release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ${{ github.workspace }}/sm-environment/package.zip
-        asset_name: ${{ matrix.asset_name }}.zip
-        tag: ${{ github.ref }}    
+      - name: Prepare env
+        shell: bash
+        run: |
+          echo "GITHUB_SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Install (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y clang g++-multilib
+          echo "CC=clang" >> $GITHUB_ENV
+          echo "CXX=clang++" >> $GITHUB_ENV
+
+      - name: Add msbuild to PATH (Windows)
+        if: runner.os == 'Windows'
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Install (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          :: See https://github.com/microsoft/vswhere/wiki/Find-VC
+          for /f "usebackq delims=*" %%i in (`vswhere -latest -property installationPath`) do (
+            call "%%i"\Common7\Tools\vsdevcmd.bat -arch=x86 -host_arch=x64
+          )
+
+          :: Loop over all environment variables and make them global.
+          for /f "delims== tokens=1,2" %%a in ('set') do (
+            echo>>"%GITHUB_ENV%" %%a=%%b
+          )
+
+      - name: Checking out SourceMod
+        uses: actions/checkout@v3
+        with:
+          repository: alliedmodders/sourcemod
+          ref: ${{ matrix.sm_branch }}
+          path: sourcemod-${{ matrix.sm_version }}
+          submodules: recursive
+
+      - name: Checking out MM:Source
+        uses: actions/checkout@v3
+        with:
+          repository: alliedmodders/metamod-source
+          ref: ${{ matrix.mm_branch }}
+          path: metamod-${{ matrix.mm_version }}
+
+      - name: Setting up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Getting ambuild
+        run: |
+          python -m pip install wheel
+          pip install git+https://github.com/alliedmodders/ambuild
+
+      - name: Checking out hl2sdk-l4d2
+        uses: actions/checkout@v3
+        with:
+          repository: alliedmodders/hl2sdk
+          ref: l4d2
+          path: hl2sdk-l4d2
+
+      - name: Getting Steam Works
+        uses: actions/checkout@v3
+        with:
+         repository: 'spumer/SteamworksSDK'
+         ref: 'v1.56'
+         path: 'steamworks-sdk'
+         token: ${{ secrets.STEAMWORKS_REPO_ACCESS_TOKEN }}
+
+      - name: Checking out own repository
+        uses: actions/checkout@v3
+        with:
+          path: steamworks
+
+      - name: Run Build
+        shell: bash
+        working-directory: ./steamworks
+        run: |
+          mkdir build
+          cd build
+          python ../configure.py \
+          --enable-optimize \
+          --hl2sdk-root=$GITHUB_WORKSPACE \
+          --mms-path=$GITHUB_WORKSPACE/metamod-${{ matrix.mm_version }} \
+          --sm-path=$GITHUB_WORKSPACE/sourcemod-${{ matrix.sm_version }} \
+          --swsdk-path=$GITHUB_WORKSPACE/steamworks-sdk/sdk
+          ambuild
+
+      - name: Uploading package
+        uses: actions/upload-artifact@v2
+        with:
+          name: steamworks-sm${{ matrix.sm_version }}-${{ matrix.os_short }}-${{ env.GITHUB_SHA_SHORT }}
+          path: steamworks/build/package

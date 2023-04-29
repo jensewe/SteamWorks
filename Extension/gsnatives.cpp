@@ -192,15 +192,8 @@ static cell_t sm_ClearRules(IPluginContext *pContext, const cell_t *params)
 
 static cell_t sm_ForceHeartbeat(IPluginContext *pContext, const cell_t *params)
 {
-	ISteamGameServer *pServer = GetGSPointer();
-
-	if (pServer == NULL)
-	{
-		return 0;
-	}
-
-	pServer->ForceHeartbeat();
-	return 1;
+	// Replace it via ISteamGameServer->SetAdvertiseServerActive(true); ?
+	return pContext->ThrowNativeError("Function deprecated since v1.52");
 }
 
 static cell_t sm_UserHasLicenseForApp(IPluginContext *pContext, const cell_t *params)

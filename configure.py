@@ -24,16 +24,16 @@ parser.options.add_argument('--hl2sdk-root', type=str, dest='hl2sdk_root', defau
 parser.options.add_argument('--mms-path', type=str, dest='mms_path', default=None,
                        help='Path to Metamod:Source')
 parser.options.add_argument('--sm-path', type=str, dest='sm_path', default=None,
-                       help='Path to Sourcemod')
-parser.options.add_argument('--steamworks-path', type=str, dest='steamworks_path', default=None,
-                       help='Path to SteamWorks')
+                       help='Path to SourceMod')
+parser.options.add_argument('--swsdk-path', type=str, dest='swsdk_path', default=None,
+                       help='Path to SteamWorks SDK')
 parser.options.add_argument('--enable-debug', action='store_const', const='1', dest='debug',
                        help='Enable debugging symbols')
 parser.options.add_argument('--enable-optimize', action='store_const', const='1', dest='opt',
                        help='Enable optimization')
-parser.options.add_argument('-s', '--sdks', default='all', dest='sdks',
-                       help='Build against specified SDKs; valid args are "all", "present", or '
-                            'comma-delimited list of engine names')
-parser.options.add_argument('--target', default=None, help='Override the default build target')
-
+parser.options.add_argument('-s', '--sdks', default='present', dest='sdks',
+                       help='Build against specified SDKs; valid args are "none", "all", "present",'
+                            ' or comma-delimited list of engine names')
+parser.options.add_argument('--targets', type=str, dest='targets', default=None,
+		                      help="Override the target architecture (use commas to separate multiple targets).")
 parser.Configure()
