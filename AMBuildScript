@@ -616,8 +616,7 @@ Extension.configure()
 builder.targets = builder.CloneableList(Extension.all_targets)
 
 BuildScripts = [
-    'vsp/AMBuilder',
-    'extension/AMBuilder',
+    'Extension/AMBuilder',
 ]
 
 if builder.backend == 'amb2':
