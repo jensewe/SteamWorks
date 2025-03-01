@@ -94,7 +94,7 @@ jobs:
           )
 
       - name: Checking out SourceMod
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: alliedmodders/sourcemod
           ref: ${{ matrix.sm_branch }}
@@ -102,7 +102,7 @@ jobs:
           submodules: recursive
 
       - name: Checking out MM:Source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: alliedmodders/metamod-source
           ref: ${{ matrix.mm_branch }}
@@ -119,14 +119,14 @@ jobs:
           pip install git+https://github.com/alliedmodders/ambuild
 
       - name: Checking out hl2sdk-l4d2
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: alliedmodders/hl2sdk
           ref: l4d2
           path: hl2sdk-l4d2
 
       - name: Getting Steam Works
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
          repository: 'spumer/SteamworksSDK'
          ref: 'v1.56'
@@ -134,7 +134,7 @@ jobs:
          token: ${{ secrets.STEAMWORKS_REPO_ACCESS_TOKEN }}
 
       - name: Checking out own repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: steamworks
 
@@ -153,7 +153,7 @@ jobs:
           ambuild
 
       - name: Uploading package
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: steamworks-sm${{ matrix.sm_version }}-${{ matrix.os_short }}-${{ env.GITHUB_SHA_SHORT }}
           path: steamworks/build/package
