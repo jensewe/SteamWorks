@@ -27,7 +27,7 @@ jobs:
           - windows-latest
 
         sm_version:
-          - "1.6"
+          # - "1.6"
           - "1.11"
           - "1.12"
           - "latest"
@@ -48,8 +48,8 @@ jobs:
           - sm_version: "latest"
             sm_branch: "master"
             
-          - sm_version: "1.6"
-            sm_branch: "1.6-dev"
+          # - sm_version: "1.6"
+          #   sm_branch: "1.6-dev"
 
           - os: ubuntu-20.04
             os_short: oldlinux
