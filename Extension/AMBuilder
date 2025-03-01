@@ -44,4 +44,23 @@ for sdk_name in Extension.sdks:
     binary = Extension.HL2ExtConfig(project, builder, cxx, projectName + '.ext.' + sdk['extension'], sdk)
     Extension.AddCDetour(binary)
 
+    binary.compiler.defines += ['META_NO_HL2SDK', 'SOURCEMOD_BUILD', 'VERSION_SAFE_STEAM_API_INTERFACES']
+    binary.compiler.cxxincludes += [
+        os.path.join(Extension.swsdk_root, 'public', 'steam'),
+        os.path.join(sdk.path, 'public', 'steam')
+    ]
+
+    if binary.compiler.target.platform == 'linux':
+      binary.compiler.postlink += [
+          os.path.join(Extension.swsdk_root, 'redistributable_bin', 'linux32','libsteam_api.so')
+      ]
+    elif binary.compiler.target.platform == 'windows':
+      binary.compiler.postlink += [
+          os.path.join(Extension.swsdk_root, 'redistributable_bin', 'steam_api.lib'),
+      ]
+    elif binary.compiler.target.platform == 'mac':
+      binary.compiler.postlink += [
+          os.path.join(Extension.swsdk_root, 'redistributable_bin', 'osx', 'libsteam_api.dylib'),
+      ]
+
 Extension.extensions += builder.Add(project)
