@@ -148,7 +148,8 @@ jobs:
           --hl2sdk-root=$GITHUB_WORKSPACE \
           --mms-path=$GITHUB_WORKSPACE/metamod-${{ matrix.mm_version }} \
           --sm-path=$GITHUB_WORKSPACE/sourcemod-${{ matrix.sm_version }} \
-          --swsdk-path=$GITHUB_WORKSPACE/steamworks-sdk/steamworks_sdk
+          --swsdk-path=$GITHUB_WORKSPACE/steamworks-sdk/steamworks_sdk \
+          --hl2sdk-manifest-path=$GITHUB_WORKSPACE/sourcemod-${{ matrix.sm_version }}/hl2sdk-manifests \
           ambuild
 
       - name: Uploading package
