@@ -18,6 +18,7 @@ sourceFiles = [
   'swhttp.cpp',
   'swhttprequest.cpp',
   'swgchooks.cpp',
+  os.path.join('asm', 'asm.c'),
 ]
 
 project = builder.LibraryProject(projectName)
