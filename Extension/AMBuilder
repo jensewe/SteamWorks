@@ -47,7 +47,7 @@ for sdk_name in Extension.sdks:
     binary.compiler.defines += ['META_NO_HL2SDK', 'SOURCEMOD_BUILD', 'VERSION_SAFE_STEAM_API_INTERFACES']
     binary.compiler.cxxincludes += [
         os.path.join(Extension.swsdk_root, 'public', 'steam'),
-        os.path.join(sdk.path, 'public', 'steam')
+        os.path.join(sdk['path'], 'public', 'steam')
     ]
 
     if binary.compiler.target.platform == 'linux':
