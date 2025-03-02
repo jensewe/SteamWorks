@@ -60,8 +60,9 @@ static cell_t sm_RequestUserStats(IPluginContext *pContext, const cell_t *params
 		return 0;
 	}
 
-	int client = gamehelpers->ReferenceToIndex(params[1]);
+	int client = params[1];
 	IGamePlayer *pPlayer = playerhelpers->GetGamePlayer(client); /* Man, including GameHelpers and PlayerHelpers for this native :(. */
+																/* Man, we don't need GameHelpers any more :). */
 	if (pPlayer == NULL || pPlayer->IsConnected() == false)
 	{
 		return pContext->ThrowNativeError("Client index %d is invalid", params[1]);
@@ -80,8 +81,9 @@ static cell_t sm_GetStatCell(IPluginContext *pContext, const cell_t *params)
 		return 0;
 	}
 
-	int client = gamehelpers->ReferenceToIndex(params[1]);
+	int client = params[1];
 	IGamePlayer *pPlayer = playerhelpers->GetGamePlayer(client); /* Man, including GameHelpers and PlayerHelpers for this native :(. */
+																/* Man, we don't need GameHelpers any more :). */
 	if (pPlayer == NULL || pPlayer->IsConnected() == false)
 	{
 		return pContext->ThrowNativeError("Client index %d is invalid", params[1]);
@@ -123,8 +125,9 @@ static cell_t sm_GetStatFloat(IPluginContext *pContext, const cell_t *params)
 		return 0;
 	}
 
-	int client = gamehelpers->ReferenceToIndex(params[1]);
+	int client = params[1];
 	IGamePlayer *pPlayer = playerhelpers->GetGamePlayer(client); /* Man, including GameHelpers and PlayerHelpers for this native :(. */
+																/* Man, we don't need GameHelpers any more :). */
 	if (pPlayer == NULL || pPlayer->IsConnected() == false)
 	{
 		return pContext->ThrowNativeError("Client index %d is invalid", params[1]);

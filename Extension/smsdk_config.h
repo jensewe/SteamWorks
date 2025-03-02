@@ -40,8 +40,8 @@
 /* Basic information exposed publicly */
 #define SMEXT_CONF_NAME			"SteamWorks Extension"
 #define SMEXT_CONF_DESCRIPTION	"Exposes SteamWorks functions to Developers"
-#define SMEXT_CONF_VERSION		"1.2.3"
-#define SMEXT_CONF_AUTHOR		"Kyle Sanderson"
+#define SMEXT_CONF_VERSION		"1.2.4"
+#define SMEXT_CONF_AUTHOR		"Kyle Sanderson, Forgetest"
 #define SMEXT_CONF_URL			"http://AlliedMods.net"
 #define SMEXT_CONF_LOGTAG		"STEAMWORKS"
 #define SMEXT_CONF_LICENSE		"GPLv3"
@@ -65,7 +65,7 @@
 //#define SMEXT_ENABLE_DBMANAGER
 #define SMEXT_ENABLE_GAMECONF
 //#define SMEXT_ENABLE_MEMUTILS
-#define SMEXT_ENABLE_GAMEHELPERS
+//#define SMEXT_ENABLE_GAMEHELPERS
 //#define SMEXT_ENABLE_TIMERSYS
 //#define SMEXT_ENABLE_THREADER
 #define SMEXT_ENABLE_LIBSYS
